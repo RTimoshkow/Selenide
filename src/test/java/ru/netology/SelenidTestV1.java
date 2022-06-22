@@ -18,6 +18,9 @@ public class SelenidTestV1 {
     LocalDateTime newData = LocalDateTime.now().plusDays(3);
     DateTimeFormatter formatData = DateTimeFormatter.ofPattern("dd MM yyyy");
 
+
+
+
     @BeforeEach
     void openBrowser() {
         open("http://localhost:9999");
@@ -102,12 +105,22 @@ public class SelenidTestV1 {
         $("[data-test-id=\"notification\"] [class=\"notification__title\"]").shouldBe(text("Успешно!"), Duration.ofSeconds(15));
     }
 
+    // тест виджета календаря
     @Test
     void shouldDropDownCalendar() {
         $("[data-test-id=\"city\"] [placeholder=\"Город\"]").val("Ростов-на-Дону");
         $("[data-test-id=\"date\"] [placeholder=\"Дата встречи\"]").click();
         ElementsCollection dates = $$("[class='popup__container'] [data-day]");
-        dates.get(6).click();
+        int days = 7 - 3; //необходимое колличество дней на которые мы бранируем встречу минус три дня согласно второму пункту из ТЗ
+        int remains;  //остаток который мы вычтем из нового месяца(если необходимо)
+        int currentWeek = dates.size(); //колличество элементов на странице
+        if (currentWeek < days) { //если элементов не достаточно, мы переключаем на другой месяц
+            remains = days - currentWeek;
+            $("[class='popup__container'] [data-step=\"1\"]").click();
+            dates.get(remains).click();
+        } else {
+            dates.get(days).click();
+        }
         $("[data-test-id=\"name\"] [name=\"name\"]").val("Вяся Пупкин");
         $("[data-test-id=\"phone\"] [name=\"phone\"]").val("+12345678901");
         $("[data-test-id=\"agreement\"] [class=\"checkbox__box\"]").click();
